@@ -169,7 +169,7 @@ project/
 
 🛠️ Installation
 1️⃣ Clone Repository
-git clone https://github.com/yourusername/credit-card-fraud-detection.git
+git clone https://github.com/PraveenAchary/CreditCardFraudDetection.git
 cd credit-card-fraud-detection
 
 2️⃣ Backend Setup
