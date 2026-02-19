@@ -34,6 +34,7 @@ export default function Predict() {
     }, 300);
 
     const dataToSend = {
+      name:name,
       time: time,
       amount: amount,
     };
