@@ -11,22 +11,35 @@ model_path = os.path.join(BASE_DIR,"model.pkl")
 model = joblib.load(model_path)
 
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import numpy as np
+
 @api_view(['POST'])
 def predict(request):
-    if request.method=='POST':
-        try:
-            #data = json.loads(request.body)
-            data = request.data
-            name = str(data.get("name"))
-            time = float(data.get("time"))
-            amount = float(data.get("amount"))
-            if name and time and amount:
-                random_pca = np.random.normal(0, 1, 28)
-                feauters = [time] + list(random_pca)+ [amount]
-                input_data = np.array(feauters).reshape(1,-1)
-                prediction = model.predict(input_data)[0]
-                #print("Prediction is:",prediction)
-                return Response({"prediction":int(prediction)})
+    try:
+        data = request.data  # ✅ VERY IMPORTANT (NOT json.loads)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=500)
+        name = data.get("name")
+        time = data.get("time")
+        amount = data.get("amount")
+
+        if name is None or time is None or amount is None:
+            return Response({"error": "Missing fields"}, status=400)
+
+        time = float(time)
+        amount = float(amount)
+
+        # dummy PCA features
+        random_pca = np.random.normal(0, 1, 28)
+        features = [time] + list(random_pca) + [amount]
+        input_data = np.array(features).reshape(1, -1)
+
+        prediction = model.predict(input_data)[0]
+
+        return Response({"prediction": int(prediction)})
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        return Response({"error": str(e)}, status=500)
+
