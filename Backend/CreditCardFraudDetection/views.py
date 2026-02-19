@@ -15,8 +15,8 @@ model = joblib.load(model_path)
 def predict(request):
     if request.method=='POST':
         try:
-            data = json.loads(request.body)
-            
+            #data = json.loads(request.body)
+            data = request.data
             name = str(data.get("name"))
             time = float(data.get("time"))
             amount = float(data.get("amount"))
@@ -25,8 +25,8 @@ def predict(request):
                 feauters = [time] + list(random_pca)+ [amount]
                 input_data = np.array(feauters).reshape(1,-1)
                 prediction = model.predict(input_data)[0]
-                print("Prediction is:",prediction)
+                #print("Prediction is:",prediction)
                 return Response({"prediction":int(prediction)})
 
         except Exception as e:
-            return Response({"error":"Error in Prediction"})
+            return Response({"error": str(e)}, status=500)
