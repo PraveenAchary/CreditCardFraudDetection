@@ -55,7 +55,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'CreditCardFraudDetection.urls'
 # CORS config
-CORS_ALLOW_ALL_ORIGINS = True  # for testing only
+CORS_ALLOW_ALL_ORIGINS = [
+    "https://credit-card-fraud-detection-7i31lpp61.vercel.app",
+]#True  # for testing only
 CORS_ALLOW_METHODS = ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
 CORS_ALLOW_HEADERS = ["content-type","authorization"]
 TEMPLATES = [
