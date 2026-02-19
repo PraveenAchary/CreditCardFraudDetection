@@ -6,8 +6,11 @@ export default function Predict() {
   const [amount, setAmount] = useState("");
   const [time, setTime] = useState("");
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false); // ✅ Loading state
+  const [progress, setProgress] = useState(0);   // ✅ Progress bar
+  const [error, setError] = useState(null);
 
-  // 🔥 make full website dark
+  // 🔥 Full dark theme
   useEffect(() => {
     document.body.style.margin = "0";
     document.body.style.backgroundColor = "#020617";
@@ -17,22 +20,45 @@ export default function Predict() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setLoading(true);
+    setProgress(0);
+    setResult(null);
+    setError(null);
+
+    // Animate progress bar while waiting
+    let prog = 0;
+    const interval = setInterval(() => {
+      prog += Math.random() * 10; // random progress increment
+      if (prog > 95) prog = 95;    // stop before 100%
+      setProgress(prog);
+    }, 300);
+
     const dataToSend = {
       time: time,
       amount: amount,
     };
 
     try {
-      const response = await fetch("https://creditcardfrauddetection-firf.onrender.com/predict/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dataToSend),
-      });
+      const response = await fetch(
+        "https://creditcardfrauddetection-firf.onrender.com/predict/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dataToSend),
+        }
+      );
+
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
       const data = await response.json();
       setResult(data.prediction);
-    } catch (error) {
-      console.log("Error:", error);
+      setProgress(100); // complete progress bar
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      clearInterval(interval);
+      setTimeout(() => setProgress(0), 500); // reset progress bar
     }
   };
 
@@ -43,7 +69,7 @@ export default function Predict() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "#020617", // full dark page
+        background: "#020617",
         fontFamily: "Arial, sans-serif",
       }}
     >
@@ -58,9 +84,7 @@ export default function Predict() {
           border: "1px solid #1f2937",
         }}
       >
-        <h1 style={{ marginBottom: "22px" }}>
-          Credit Card Fraud Detection
-        </h1>
+        <h1 style={{ marginBottom: "22px" }}>Credit Card Fraud Detection</h1>
 
         <form onSubmit={handleSubmit}>
           {/* Name */}
@@ -107,9 +131,7 @@ export default function Predict() {
 
           {/* Amount */}
           <div style={{ marginBottom: "20px", textAlign: "left" }}>
-            <label style={{ fontWeight: "600", fontSize: "14px" }}>
-              Amount
-            </label>
+            <label style={{ fontWeight: "600", fontSize: "14px" }}>Amount</label>
             <input
               type="number"
               value={amount}
@@ -130,6 +152,7 @@ export default function Predict() {
 
           <button
             type="submit"
+            disabled={loading} // disable while predicting
             style={{
               width: "100%",
               padding: "12px",
@@ -139,14 +162,38 @@ export default function Predict() {
               color: "white",
               fontSize: "16px",
               fontWeight: "600",
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            Check Fraud
+            {loading ? "Predicting..." : "Check Fraud"}
           </button>
         </form>
 
-        {result !== null && (
+        {/* Progress Bar */}
+        {loading && (
+          <div
+            style={{
+              marginTop: "20px",
+              height: "8px",
+              width: "100%",
+              background: "#334155",
+              borderRadius: "4px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                width: `${progress}%`,
+                background: "#2563eb",
+                transition: "width 0.3s ease",
+              }}
+            ></div>
+          </div>
+        )}
+
+        {/* Result */}
+        {result !== null && !loading && (
           <div
             style={{
               marginTop: "22px",
@@ -159,6 +206,23 @@ export default function Predict() {
             }}
           >
             {result === 1 ? "Fraud 🚨" : "Legit ✅"}
+          </div>
+        )}
+
+        {/* Error */}
+        {error && !loading && (
+          <div
+            style={{
+              marginTop: "22px",
+              padding: "12px",
+              borderRadius: "7px",
+              background: "#3f1d1d",
+              color: "#f87171",
+              fontWeight: "bold",
+              border: "1px solid #1f2937",
+            }}
+          >
+            {error}
           </div>
         )}
       </div>
