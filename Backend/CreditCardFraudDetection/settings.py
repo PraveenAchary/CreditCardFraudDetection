@@ -54,7 +54,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'CreditCardFraudDetection.urls'
-
+# CORS config
+CORS_ALLOW_ALL_ORIGINS = True  # for testing only
+CORS_ALLOW_METHODS = ["GET","POST","PUT","PATCH","DELETE","OPTIONS"]
+CORS_ALLOW_HEADERS = ["content-type","authorization"]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
